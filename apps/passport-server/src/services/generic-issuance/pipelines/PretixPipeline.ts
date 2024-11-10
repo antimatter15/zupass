@@ -357,7 +357,7 @@ export class PretixPipeline implements BasePipeline {
           logs.push(...validationErrors.errors.map((e) => makePLogErr(e)));
           errors.push(...validationErrors.errors);
 
-          tickets.push(...(await this.ordersToTickets(event, eventData)));
+          tickets.push(...(await this.ordersToTickets(event, eventData, logs)));
         }
 
         if (errors.length > 0) {
@@ -862,7 +862,8 @@ export class PretixPipeline implements BasePipeline {
    */
   private async ordersToTickets(
     eventConfig: PretixEventConfig,
-    eventData: PretixEventData
+    eventData: PretixEventData,
+    logs?: PipelineLog[]
   ): Promise<PretixTicket[]> {
     const tickets: PretixTicket[] = [];
     const { orders } = eventData;
@@ -937,6 +938,16 @@ export class PretixPipeline implements BasePipeline {
 
           const resolvedName =
             nameQuestionAnswer ?? attendee_name ?? order.name ?? "";
+
+          if (resolvedName === "") {
+            logs?.push(
+              makePLogWarn(
+                `no resolved name for ticket id '${str(
+                  id
+                )}' with email '${email}'`
+              )
+            );
+          }
 
           tickets.push({
             email,
