@@ -275,14 +275,20 @@ export const NewHomeScreen = (): ReactElement => {
 
         if (!email || !code) return;
 
-        if (self && !self.emails?.includes(email as string)) {
-          await dispatch({
-            type: "reset-passport",
-            redirectTo: window.location.href
-          });
+        if (self) {
+          if (!self.emails?.includes(email as string)) {
+            await dispatch({
+              type: "reset-passport",
+              redirectTo: window.location.href
+            });
+          } else {
+            window.location.hash = targetFolder
+              ? "/?folder=" + targetFolder
+              : "/";
+            window.location.reload();
+          }
           return;
         }
-
         await dispatch({
           type: "one-click-login",
           email,
